@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <ncurses.h> // -lncurses
-
-#define PAGE_SIZE 500
-#define LINE_SIZE 128
-#define WIN_SIZE LINES - 2
+#include "text.h"
 
 /**
  * Word Processing Program
@@ -15,27 +7,6 @@
  *	-Saving
  *	-Loading	
  **/
-
-typedef struct
-{
-	char *line;
-	int size; 
-} LINE;
-
-typedef struct
-{
-	LINE *text; // lines of text
-	int numlines;
-} PAGE;
-
-void load_file(int argc, char **argv, PAGE *p);
-void save_file(int argc, char **argv, PAGE *p);
-void init_page(PAGE *p);
-void dest_page(PAGE *p);
-void insert(LINE *s, char c, int index); // inserts to string
-void remove_char(LINE *s, int index);
-void expand(LINE *s);
-void print_page(const PAGE *p);
 
 int main(int argc, char *argv[])
 {
@@ -56,7 +27,7 @@ int main(int argc, char *argv[])
 	mvprintw(LINES - 1, 0, "Press F4 to quit.");
 	attroff(A_REVERSE);
 
-	print_page(&page);
+	print_page(&page, 0, WIN_SIZE);
 
 	int y, x;
 	getyx(stdscr, y, x);
@@ -70,10 +41,16 @@ int main(int argc, char *argv[])
 				goto end;
 				break;
 			case KEY_UP:
-				if( y >= 0 ) move(--y, x);
+				if( y > 0 ) --y;
+				if( x > strlen(page.text[y].line) + 1 ) // cursor adjusts to smaller
+					x = strlen(page.text[y].line) + 1;  // lines
+				move(y, x);
 				break;
 			case KEY_DOWN:
-				if( y < WIN_SIZE ) move(++y, x);
+				if( y < WIN_SIZE ) ++y;
+				if( x > strlen(page.text[y].line) + 1 )
+					x = strlen(page.text[y].line) + 1;
+				move(y, x);
 				break;
 			case KEY_LEFT:
 				if(x - 1 > 0)
@@ -86,16 +63,27 @@ int main(int argc, char *argv[])
 			case KEY_DC:
 			case 127: // backspace key...
 			case KEY_BACKSPACE:
-				remove_char(&page.text[y], x - 1);
-				print_page(&page);
-				move(y, --x);
+				if(page.text[y].line[x - 2] == '\0')
+				{
+					remove_line(&page, y);
+					if( y > 0 ) --y;
+					if( x > strlen(page.text[y].line) + 1 )
+						x = strlen(page.text[y].line) + 1;
+				}
+				else
+				{
+					remove_char(&page.text[y], x - 2); // why 2?
+					if( x > 0 ) x--;
+				}
+				print_page(&page, 0, WIN_SIZE);
+				move(y, x);
 				refresh();
 				break;
 			default: // all other chars
 				if( isprint(ch) )
 				{
 					insert(&page.text[y], ch, x - 1);
-					print_page(&page);
+					print_page(&page, 0, WIN_SIZE);
 					move(y, ++x);
 					refresh(); 
 				}
@@ -185,13 +173,18 @@ void insert(LINE *s, char c, int index)
 	s->line[index] = c;
 } // insert
 
+// removes a char from line, if it's the last char '\0'
+// then it calls remove_line
 void remove_char(LINE *s, int index)
 {
-	int i;
-	int len = strlen(s->line);
-	for(i = index; i < len; i++)
-		s->line[i] = s->line[i + 1];
-} // remove
+	//if(s->line[index] != '\0')
+	//{
+		int i;
+		int len = strlen(s->line);
+		for(i = index; i < len; i++)
+			s->line[i] = s->line[i + 1];
+	//}
+} // remove_char
 
 // expands size of line
 void expand(LINE *s)
@@ -204,9 +197,24 @@ void expand(LINE *s)
 	s->size = new_size;	
 } // expand
 
-void print_page(const PAGE *p)
+void remove_line(PAGE *p, int index)
+{
+	free(p->text[index].line);
+	int i;
+	for(i = index; i < p->numlines - 1; i++)
+	{
+		p->text[i] = p->text[i + 1];
+	}
+	(p->numlines)--;
+} // remove_line
+
+void print_page(const PAGE *p, int start, int end)
 {
 	int i;
-	for(i = 0; i < p->numlines && i < WIN_SIZE; i++)
-		mvprintw(i, 1, "%s ", p->text[i].line);
+	for(i = start; i < p->numlines && i < end; i++)
+	{
+		move(i, 1);
+		clrtoeol();
+		printw("%s ", p->text[i].line);
+	}
 }
