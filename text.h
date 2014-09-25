@@ -2,35 +2,21 @@
 #define TEXT_H
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> // declared in line.h
 #include <ctype.h>
-#include <string.h>
-#include <ncurses.h> // -lncurses
+#include <string.h> // declared in line.h
+#include <ncurses.h> // -lncurses. declared in page.h
 
-#define PAGE_SIZE 500
-#define LINE_SIZE 128
-#define WIN_SIZE LINES - 2
-
-typedef struct
-{
-	char *line;
-	int size; 
-} LINE;
-
-typedef struct
-{
-	LINE *text; // lines of text
-	int numlines;
-} PAGE;
+#include "page.h"
 
 void load_file(int argc, char **argv, PAGE *p);
 void save_file(int argc, char **argv, PAGE *p);
-void init_page(PAGE *p);
-void dest_page(PAGE *p);
-void insert(LINE *s, char c, int index); // inserts to string
-void remove_char(LINE *s, int index);
-void remove_line(PAGE *p, int index);
-void expand(LINE *s);
-void print_page(const PAGE *p, int start, int end);
+
+void move_left(int *x, int *y);
+void move_right(PAGE *p, int *x, int *y);
+void move_up(PAGE *p, int *x, int *y);
+void move_down(PAGE *p, int *x, int *y);
+
 
 #endif
+
