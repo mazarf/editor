@@ -7,13 +7,24 @@
  *	-Saving
  *	-Loading	
  **/
- 
- // TODO: Create move_up, down, left, right functions
+
+int y_offset = 0; // TODO: move to local scope
+
+#define DEBUG
+
+void print_loc(int x, int y)
+{
+	#ifdef DEBUG
+	int oldx, oldy;
+	getyx(stdscr, oldy, oldx);
+	mvprintw(0, COLS - 20, "x: %d y: %d o: %d", x, y, y_offset);
+	move(oldy, oldx);
+	#endif
+}
 
 int main(int argc, char *argv[])
-{
+{	
 	PAGE page;
-	init_page(&page);
 
 	if(argc > 1)
 	{
@@ -21,6 +32,7 @@ int main(int argc, char *argv[])
 	}
 	else // initialize
 	{
+		init_page(&page, PAGE_SIZE);
 		page.text[0].line[0] = '\0';
 		page.numlines = 1;
 	}
@@ -29,77 +41,100 @@ int main(int argc, char *argv[])
 	initscr();
 	noecho();
 	keypad(stdscr, true);
+	
+	int beg = 0;
+	int end = WIN_SIZE;
+	int y, x; // position on screen
+	
 
-	attron(A_REVERSE);
-	mvprintw(LINES - 1, 0, "Press F4 to quit.");
-	attroff(A_REVERSE);
-
-	print_page(&page, 0, WIN_SIZE);
-
-	int y, x;
+	update_status("Press F4 to quit");
+	
+	print_page(&page, beg, end);
 	getyx(stdscr, y, x);
-	//int yoffset = 0; // offset to account for screen scroll
 
 	while(true)
 	{
+		beg = 0 + y_offset;
+		end = WIN_SIZE + y_offset;
 		int ch = getch();
+		update_status("Press F4 to quit"); // default text
 		switch(ch)
 		{
 			case KEY_F(4):
-				goto end;
+				goto endnc;
 				break;
 			case KEY_F(5):
 				save_file(argc, argv, &page);
+				update_status("Saved as \'save.txt\'");
 				break;
 			case KEY_UP:
 				move_up(&page, &x, &y);
+				print_loc(x, y);
 				break;
 			case KEY_DOWN:
 				move_down(&page, &x, &y);
+				print_loc(x, y);
 				break;
 			case KEY_LEFT:
 				move_left(&x, &y);
+				print_loc(x, y);
 				break;
 			case KEY_RIGHT:
 				move_right(&page, &x, &y);
+				print_loc(x, y);
 				break;
 			case KEY_DC:
 			case 127: // backspace key...
 			case KEY_BACKSPACE:
-				if(page.text[y].line[x - 2] == '\0')
-				{
-					remove_line(&page, y);
+				if(strlen(page.text[y + y_offset].line) == 0)
+				{	// can only delete blank lines for now
+					remove_line(&page, y + y_offset);
 					move_up(&page, &x, &y);
 				}
-				else
+				else if( x > 1 )
 				{
-					remove_char(&page.text[y], x - 2); // why 2?
-					move_left(&x, &y);
+					remove_char(&page.text[y + y_offset], x - 2); // delete
+					move_left(&x, &y);				  // char behind cursor
 				}
-				print_page(&page, 0, WIN_SIZE);
+				print_page(&page, beg, end);
 				move(y, x);
 				break;
 			case '\n': // newline
-				insert_line(&page, y + 1);
-				print_page(&page, 0, WIN_SIZE);
+				insert_line(&page, y + y_offset + 1);
+				print_page(&page, beg, end);
 				move_down(&page, &x, &y);
 				break;
 			default: // all other chars
 				if( isprint(ch) )
 				{
-					insert_char(&page.text[y], ch, x - 1);
-					print_page(&page, 0, WIN_SIZE);
+					insert_char(&page.text[y + y_offset], ch, x - 1);
+					print_page(&page, beg, end);
 					move_right(&page, &x, &y);
 				}
 		}
 	}
-end:	endwin();
+endnc:	endwin();
 	/* end curses */
 
 	dest_page(&page);
 	return EXIT_SUCCESS;
 } // main
 
+// prints a message at the bottom of the window
+void update_status(char *info)
+{
+	int oldy, oldx; getyx(stdscr, oldy, oldx);
+	
+	attron(A_REVERSE);
+	move(LINES - 1, 0);
+	clrtoeol();
+	printw(info);
+	attroff(A_REVERSE);
+	
+	move(oldy, oldx);
+} // update_status
+
+/* movement */
 void move_left(int *x, int *y)
 {
 	if(*x - 1 > 0) move(*y, --(*x));
@@ -108,29 +143,62 @@ void move_left(int *x, int *y)
 
 void move_right(PAGE *p, int *x, int *y)
 {
-	if(*x <= strlen(p->text[*y].line)) move(*y, ++(*x));
+	if(*x <= strlen(p->text[*y + y_offset].line)) move(*y, ++(*x));
 }
 
 void move_up(PAGE *p, int *x, int *y)
 {
-	if( *y > 0 ) --(*y);
-	if( *x > strlen(p->text[*y].line) + 1 ) // cursor adjusts
-		*x = strlen(p->text[*y].line) + 1;  // to smaller lines
+	if( *y > 0 )
+	{
+		--(*y);
+	}
+	else if (y_offset > 0)
+	{
+		--(y_offset);
+		print_page(p, 0 + y_offset, WIN_SIZE + y_offset);	
+	}
+	if( *x > strlen(p->text[*y + y_offset].line) + 1 ) // cursor adjusts
+		*x = strlen(p->text[*y + y_offset].line) + 1;  // to smaller lines
 	move(*y, *x);
 }
 void move_down(PAGE *p, int *x, int *y)
 {
-	if( *y < WIN_SIZE ) ++(*y);
-	if( *x > strlen(p->text[*y].line) + 1 )
-		*x = strlen(p->text[*y].line) + 1;
-	move(*y, *x);
-};
+	if( *y < WIN_SIZE - 1 && *y < p->numlines  - 1 )
+	{
+		 ++(*y);
+	}
+	else if ( *y + y_offset < p->numlines - 1 )
+	{
+		++(y_offset);
+		print_page(p, 0 + y_offset, WIN_SIZE + y_offset);	
+	}
 
+	if( *x > strlen(p->text[*y + y_offset].line) + 1 )
+		*x = strlen(p->text[*y + y_offset].line) + 1;
+	move(*y, *x);
+}
+/* movement */
+
+int count_lines(int argc, char **argv)
+{
+	FILE *fp = fopen(argv[1], "r");
+	char ch = '\0';
+	int count = 0;
+	while((ch = fgetc(fp)) != EOF)
+		if( ch == '\n' )
+			count++;
+			
+	return count;
+} // count_lines
+
+/* saving and loading */
 void load_file(int argc, char **argv, PAGE *p)
 {
 	FILE *fp = fopen(argv[1], "r");
-	char ch = 0;
+	int size = count_lines(argc, argv) * 2;
+	char ch = '\0';
 	int line, col;
+	init_page(p, size);
 
 	for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
 	{
@@ -161,8 +229,8 @@ void save_file(int argc, char **argv, PAGE *p)
 		}
 		fputc('\n', fp);
 	}
-	fputc(EOF, fp);
 
 	fclose(fp);
 
 } // save_file
+/* saving and loading */

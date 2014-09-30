@@ -1,16 +1,16 @@
 #include "page.h"
 
-void init_page(PAGE *p)
+void init_page(PAGE *p, int size)
 {
-	p->text = (LINE *)malloc(PAGE_SIZE * sizeof(LINE));
+	p->text = (LINE *)malloc(size * sizeof(LINE));
 
 	int i;
-	for(i = 0; i < PAGE_SIZE; i++)
+	for(i = 0; i < size; i++)
 	{
-		p->text[i].line = (char *)malloc(LINE_SIZE * sizeof(char));
-		p->text[i].size = LINE_SIZE;
+		init_line(p->text + i);
 	}
 	p->numlines = 0;
+	p->size = size;
 } // init_page
 
 void dest_page(PAGE *p)
@@ -18,18 +18,20 @@ void dest_page(PAGE *p)
 	int i;
 	for(i = 0; i < p->numlines; i++)
 	{
-		free(p->text[i].line);
+		free(p->text[i].line); // maybe replace with dest_line()
 	}
 	free(p->text);
 } // dest_page
 
 
 
-// WARNING: Will not expand once the limit of 500 lines reached
+// WARNING: Expansion function implemented but not tested
 void insert_line(PAGE *p, int index)
 {	
+	if( p->numlines >= p->size ) expand_page(p);
+	
 	LINE newline;
-	newline.line = (char *)malloc(LINE_SIZE * sizeof(char));
+	init_line(&newline);
 	newline.line[0] = '\0';
 	
 	int i;
@@ -38,13 +40,14 @@ void insert_line(PAGE *p, int index)
 		p->text[i + 1] = p->text[i];
 
 	p->text[index] = newline;
+	(p->numlines)++;
 } // insert_line
 
 
 
 void remove_line(PAGE *p, int index)
 {
-	if( p->numlines > 0 )
+	if( p->numlines > 1 )
 	{
 		free(p->text[index].line);
 	
@@ -57,15 +60,31 @@ void remove_line(PAGE *p, int index)
 	}
 } // remove_line
 
+void expand_page(PAGE *p)
+{
+	int newsize = p->size * 2;
+	LINE *newline = malloc(newsize * sizeof(LINE));
+	
+	int i;
+	for(i = 0; i < p->size; i++) // copy old lines
+		newline[i] = p->text[i];
+	for(i = p->size; i < newsize; i++) // init new lines
+		init_line(newline + i);
+		
+	p->text = newline;
+	p->size = newsize;
+} // expand_page
+
+// NOTE: This moves the cursor to the end of the displayed text
 void print_page(const PAGE *p, int start, int end)
 {
-	int i;
-	for(i = start; i < p->numlines && i < end; i++)
+	int i, line;
+	for(i = start, line = 0; i < p->numlines && i < end; i++, line++)
 	{
-		move(i, 1);
+		move(line, 0);
 		clrtoeol();
-		printw("%s", p->text[i].line);
+		printw(" %s", p->text[i].line);
 	}
 	refresh();
-}
+} // print_page
 

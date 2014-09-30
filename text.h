@@ -9,6 +9,9 @@
 
 #include "page.h"
 
+void update_status(char *info);
+
+int count_lines(int argc, char **argv);
 void load_file(int argc, char **argv, PAGE *p);
 void save_file(int argc, char **argv, PAGE *p);
 

@@ -1,5 +1,11 @@
 #include "line.h"
 
+void init_line(LINE *s)
+{
+	s->size = LINE_SIZE;
+	s->line = (char *)malloc(LINE_SIZE * sizeof(char));
+} // init_line
+
 // Insert char into string. 
 void insert_char(LINE *s, char c, int index)
 {
