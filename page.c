@@ -1,6 +1,6 @@
 #include "page.h"
 
-void init_page(PAGE *p, int size)
+void init_page(PAGE *p, char *filename, int size)
 {
 	p->text = (LINE *)malloc(size * sizeof(LINE));
 
@@ -9,6 +9,7 @@ void init_page(PAGE *p, int size)
 	{
 		init_line(p->text + i);
 	}
+    strcpy(p->filename, filename);
 	p->numlines = 0;
 	p->size = size;
 } // init_page

@@ -7,15 +7,17 @@
 
 #define PAGE_SIZE 500 /* Max number of lines. Currently not expandable. */
 #define WIN_SIZE (LINES - 2) /* Size of window, making room for bottom prompt */
+#define NAME_LIMIT 256 /* Max size of a unix filename + 1 */
 
 typedef struct
 {
+    char filename[NAME_LIMIT];
 	LINE *text; // lines of text
 	int numlines;
 	int size; // size of array
 } PAGE;
 
-void init_page(PAGE *p, int size);
+void init_page(PAGE *p, char *filename, int size);
 void dest_page(PAGE *p);
 void insert_line(PAGE *p, int index);
 void remove_line(PAGE *p, int index);

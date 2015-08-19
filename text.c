@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	}
 	else // initialize
 	{
-		init_page(&page, PAGE_SIZE);
+		init_page(&page, "untitled.txt", PAGE_SIZE);
 		page.text[0].line[0] = '\0';
 		page.numlines = 1;
 	}
@@ -66,7 +66,9 @@ int main(int argc, char *argv[])
 				break;
 			case KEY_F(5):
 				save_file(argc, argv, &page);
-				update_status("Saved as \'save.txt\'");
+                char status[NAME_LIMIT + 10];
+                sprintf(status, "Saved as \'%s\'", page.filename);
+				update_status(status);
 				break;
 			case KEY_UP:
 				move_up(&page, &x, &y);
@@ -207,7 +209,7 @@ void load_file(int argc, char **argv, PAGE *p)
 	int size = count_lines(argc, argv) * 2;
 	char ch = '\0';
 	int line, col;
-	init_page(p, size);
+	init_page(p, argv[1], size);
 
 	for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
 	{
@@ -225,7 +227,7 @@ void load_file(int argc, char **argv, PAGE *p)
 
 void save_file(int argc, char **argv, PAGE *p)
 {
-	FILE *fp = fopen("save.txt", "w");
+	FILE *fp = fopen(p->filename, "w");
 	int line, col;
 
 	for(line = 0; line < p->numlines; line++)
