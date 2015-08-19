@@ -85,6 +85,12 @@ void print_page(const PAGE *p, int start, int end)
 		clrtoeol();
 		printw(" %s", p->text[i].line);
 	}
+    if(start < end)
+    {
+        move(line, 0);   
+        clrtoeol(); // if we deleted a line this may be necessary
+        move(line-1, 1);
+    }
 	refresh();
 } // print_page
 

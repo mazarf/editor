@@ -9,6 +9,7 @@
  **/
 
 int y_offset = 0; // TODO: move to local scope
+int tab_offset = 0;
 
 #define DEBUG
 
@@ -143,7 +144,14 @@ void move_left(int *x, int *y)
 
 void move_right(PAGE *p, int *x, int *y)
 {
-	if(*x <= strlen(p->text[*y + y_offset].line)) move(*y, ++(*x));
+	if(*x <= strlen(p->text[*y + y_offset].line)) 
+    {
+        if(p->text[*y + y_offset].line[*x + tab_offset] == '\t') {
+            move(*y, ++(*x));
+        } else {
+            move(*y, ++(*x));
+        }
+    }
 }
 
 void move_up(PAGE *p, int *x, int *y)
@@ -187,7 +195,8 @@ int count_lines(int argc, char **argv)
 	while((ch = fgetc(fp)) != EOF)
 		if( ch == '\n' )
 			count++;
-			
+	
+	fclose(fp);		
 	return count;
 } // count_lines
 
