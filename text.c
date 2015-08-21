@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 	print_page(&page, beg, end);
 	getyx(stdscr, y, x);
 
+    char status[NAME_LIMIT + 10];
 	while(true)
 	{
 		beg = 0 + y_offset;
@@ -66,10 +67,15 @@ int main(int argc, char *argv[])
 				break;
 			case KEY_F(5):
 				save_file(argc, argv, &page);
-                char status[NAME_LIMIT + 10];
                 sprintf(status, "Saved as \'%s\'", page.filename);
 				update_status(status);
 				break;
+            case KEY_F(6):
+                prompt_string("Save As:", page.filename);
+                save_file(argc, argv, &page);
+                sprintf(status, "Saved as \'%s\'", page.filename);
+				update_status(status);
+                break;
 			case KEY_UP:
 				move_up(&page, &x, &y);
 				print_loc(x, y);
