@@ -6,7 +6,7 @@ OBJS=text.o page.o line.o prompt.o
 LIBS=-lncurses
 
 text: $(OBJS)
-	$(CC) $(CFLAGS) -o text.exe $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o text $(OBJS) $(LIBS)
 
 text.o:	text.c text.h page.h line.h prompt.h
 	$(CC) $(CFLAGS) -c text.c

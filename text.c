@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
                 prompt_string("Save As:", page.filename);
                 save_file(argc, argv, &page);
                 sprintf(status, "Saved as \'%s\'", page.filename);
+				print_page(&page, beg, end);
 				update_status(status);
                 break;
 			case KEY_UP:

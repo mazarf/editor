@@ -7,12 +7,16 @@ so I don't plan on working on it anymore.
 
 Probably the most well-developed program I made this summer.
 
-How to use:
+##How to use:
 
-F4 quits (no prompt)
-F5 saves the current file as save.txt
+    usage: text [file ]
 
-Current issues:
+* F4 quits (no prompt)
+* F5 saves the current file (untitled.txt is the default name)
+* F6 saves the current file and allows you to specify the filename.
+(WARNING: no confirmation screen or error checking yet).
+
+##Current issues:
 
 x-y coordinates in ncurses correspond to rows and columns in
 the text document.  This means tabs are an issue and text
@@ -21,4 +25,4 @@ from document logic.
 
 Can only save files under the name save.txt.  Solution: create
 a prompt window (from scratch...) that retuns a string to the
-caller.
+caller. (Done!)
