@@ -63,7 +63,8 @@ int main(int argc, char *argv[])
 		switch(ch)
 		{
 			case KEY_F(4):
-				goto endnc;
+                if(prompt_yesno("Are you sure you want to quit?"))
+				    goto endnc;
 				break;
 			case KEY_F(5):
 				save_file(argc, argv, &page);
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 				update_status(status);
 				break;
             case KEY_F(6):
-                prompt_string("Save As:", page.filename);
+                prompt_string("Save As:", page.filename, NAME_LIMIT);
                 save_file(argc, argv, &page);
                 sprintf(status, "Saved as \'%s\'", page.filename);
 				print_page(&page, beg, end);

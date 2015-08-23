@@ -9,9 +9,9 @@ Probably the most well-developed program I made this summer.
 
 ##How to use:
 
-    usage: text [file ]
+    usage: text [ file ]
 
-* F4 quits (no prompt)
+* F4 quits (after prompt)
 * F5 saves the current file (untitled.txt is the default name)
 * F6 saves the current file and allows you to specify the filename.
 (WARNING: no confirmation screen or error checking yet).

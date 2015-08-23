@@ -1,33 +1,101 @@
 #include "prompt.h"
 
-void prompt_string(const char *message, char *name) 
-{
-   echo();
-   WINDOW *prompt = subwin(stdscr, PROMPT_LINES, PROMPT_COLS,
-                           center_y(PROMPT_LINES), center_x(PROMPT_COLS));
-   mvwprintw(prompt, 1, 1, message);
-   box(prompt, 0, 0);
-   wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);
-
-   wattron(prompt, A_REVERSE);
-   wprintw(prompt, "                  ");
-   wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);
-   wgetstr(prompt, name);
-   wattroff(prompt, A_REVERSE);
-
-   wborder(prompt, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-   werase(prompt);
-   wrefresh(prompt);
-   delwin(prompt);
-   noecho();
-}
-
-int center_x(int width) 
+static int center_x(int width) 
 {
     return (COLS - width) / 2;
 }
 
-int center_y(int height)
+static int center_y(int height)
 {
     return (LINES - height) / 2;
 }
+
+static WINDOW* create_prompt(const char *message, int height, int width)
+{
+   WINDOW *prompt = subwin(stdscr, height, width,
+                           center_y(height), center_x(width));
+   mvwprintw(prompt, 1, 1, message);
+   box(prompt, 0, 0);
+   wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);
+   return prompt;
+}
+
+static void dest_prompt(WINDOW *prompt)
+{
+   wborder(prompt, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+   werase(prompt);
+   wrefresh(prompt);
+   delwin(prompt);
+}
+
+void prompt_string(const char *message, char *name, int size) 
+{
+   echo();
+   WINDOW *prompt = create_prompt(message, 
+                                  PROMPT_STRING_LINES,
+                                  PROMPT_STRING_COLS);
+
+   wattron(prompt, A_REVERSE);
+   wprintw(prompt, "                  ");
+   wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);
+   wgetnstr(prompt, name, size);
+   wattroff(prompt, A_REVERSE);
+
+   dest_prompt(prompt);
+   noecho();
+}
+
+int prompt_yesno(const char *message)
+{
+    int prompt_width = strlen(message) + 2;
+    int yes_x = prompt_width / 2 - 6;
+    int yes_y = 3;
+    int no_x = prompt_width / 2 + 6;
+    int no_y = 3;
+
+    WINDOW *prompt = create_prompt(message,
+                                   PROMPT_YESNO_LINES,
+                                   prompt_width);
+    keypad(prompt, TRUE);
+
+    int choice = 0;
+
+
+
+    while(1)
+    {
+        if(choice == 0) // highlight the current choice
+        {
+            wattron(prompt, A_REVERSE);
+            mvwprintw(prompt, yes_y, yes_x, "YES");
+            wattroff(prompt, A_REVERSE);
+            mvwprintw(prompt, no_y, no_x, "NO");
+        }
+        else
+        {
+            mvwprintw(prompt, yes_y, yes_x, "YES");
+            wattron(prompt, A_REVERSE);
+            mvwprintw(prompt, no_y, no_x, "NO");
+            wattroff(prompt, A_REVERSE);
+        }
+
+        int ch = wgetch(prompt);
+        switch(ch)
+        {
+            case KEY_LEFT:
+            case KEY_RIGHT:
+                choice = !choice;
+                break;
+            case '\n':
+                goto end_prompt_yesno;
+                break;
+            default:
+                break;
+        } 
+    }
+
+end_prompt_yesno:
+    dest_prompt(prompt);
+    return !choice; // yes is 0
+}
+
