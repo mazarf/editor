@@ -14,6 +14,7 @@ static WINDOW* create_prompt(const char *message, int height, int width)
 {
    WINDOW *prompt = subwin(stdscr, height, width,
                            center_y(height), center_x(width));
+   werase(prompt);
    mvwprintw(prompt, 1, 1, message);
    box(prompt, 0, 0);
    wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);
@@ -48,7 +49,7 @@ void prompt_string(const char *message, char *name, int size)
 int prompt_yesno(const char *message)
 {
     int prompt_width = strlen(message) + 2;
-    int yes_x = prompt_width / 2 - 6;
+    int yes_x = prompt_width / 2 - 8;
     int yes_y = 3;
     int no_x = prompt_width / 2 + 6;
     int no_y = 3;
@@ -56,6 +57,8 @@ int prompt_yesno(const char *message)
     WINDOW *prompt = create_prompt(message,
                                    PROMPT_YESNO_LINES,
                                    prompt_width);
+
+    curs_set(0); // hide cursor
     keypad(prompt, TRUE);
 
     int choice = 0;
@@ -86,6 +89,16 @@ int prompt_yesno(const char *message)
             case KEY_RIGHT:
                 choice = !choice;
                 break;
+            case 'y':
+            case 'Y':
+                choice = 0;
+                goto end_prompt_yesno;
+                break;
+            case 'n':
+            case 'N':
+                choice = 1;
+                goto end_prompt_yesno;
+                break;
             case '\n':
                 goto end_prompt_yesno;
                 break;
@@ -96,6 +109,7 @@ int prompt_yesno(const char *message)
 
 end_prompt_yesno:
     dest_prompt(prompt);
+    curs_set(1);
     return !choice; // yes is 0
 }
 

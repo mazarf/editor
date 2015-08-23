@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 			case KEY_F(4):
                 if(prompt_yesno("Are you sure you want to quit?"))
 				    goto endnc;
+	            print_page(&page, beg, end);
 				break;
 			case KEY_F(5):
 				save_file(argc, argv, &page);
