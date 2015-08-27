@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #define LINE_SIZE 128 /* Max characters in a line. Expandable */
+#define TAB_WIDTH 4
 
 typedef struct
 {

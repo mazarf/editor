@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
 	int beg = 0;
 	int end = WIN_SIZE;
 	int y, x; // position on screen
+    int i;
 	
 
 	update_status("Press F4 to quit");
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
     char status[NAME_LIMIT + 10];
 	while(true)
 	{
+        print_loc(x, y);
 		beg = 0 + y_offset;
 		end = WIN_SIZE + y_offset;
 		int ch = getch();
@@ -81,19 +83,15 @@ int main(int argc, char *argv[])
                 break;
 			case KEY_UP:
 				move_up(&page, &x, &y);
-				print_loc(x, y);
 				break;
 			case KEY_DOWN:
 				move_down(&page, &x, &y);
-				print_loc(x, y);
 				break;
 			case KEY_LEFT:
 				move_left(&x, &y);
-				print_loc(x, y);
 				break;
 			case KEY_RIGHT:
 				move_right(&page, &x, &y);
-				print_loc(x, y);
 				break;
 			case KEY_DC:
 			case 127: // backspace key...
@@ -111,6 +109,14 @@ int main(int argc, char *argv[])
 				print_page(&page, beg, end);
 				move(y, x);
 				break;
+            case '\t':
+                for(i = 0; i < TAB_WIDTH; i++)
+                {
+                    insert_char(&page.text[y + y_offset], ' ', x - 1);
+                    print_page(&page, beg, end);
+                    move_right(&page, &x, &y);
+                }
+                break;
 			case '\n': // newline
 				insert_line(&page, y + y_offset + 1);
 				print_page(&page, beg, end);
