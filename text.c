@@ -223,18 +223,32 @@ void load_file(int argc, char **argv, PAGE *p)
 	FILE *fp = fopen(argv[1], "r");
 	int size = count_lines(argc, argv) * 2;
 	char ch = '\0';
-	int line, col;
+	int line;//, col;
 	init_page(p, argv[1], size);
 
-	for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
+	/*for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
 	{
-		for(col = 0; col < LINE_SIZE - 1 && ((ch = fgetc(fp)) != '\n') && ch != EOF; col++)
+		for(col = 0; 
+            col < LINE_SIZE - 1 && ((ch = fgetc(fp)) != '\n') && ch != EOF; 
+            col++)
 		{
 			p->text[line].line[col] = ch;
 		}
 		p->text[line].line[col] = '\0';
 		p->numlines++;
-	}
+	}*/
+
+    for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
+    {
+        ch = fgetc(fp);
+        while(ch != '\n' && ch != EOF)
+        {
+            LINE *currline = &(p->text[line]);
+            add_char(currline, ch);
+            ch = fgetc(fp);
+        }
+        p->numlines++;
+    }
 
 	fclose(fp);
 

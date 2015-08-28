@@ -4,7 +4,9 @@ void init_line(LINE *s)
 {
 	s->size = LINE_SIZE;
 	s->line = (char *)malloc(LINE_SIZE * sizeof(char));
+    s->line[0] = '\0';
 } // init_line
+
 
 // Insert char into string. 
 void insert_char(LINE *s, char c, int index)
@@ -41,3 +43,8 @@ void expand(LINE *s)
 	s->line = temp;
 	s->size = new_size;	
 } // expand
+
+void add_char(LINE *s, char c)
+{
+    insert_char(s, c, strlen(s->line));
+}
