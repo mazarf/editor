@@ -226,25 +226,24 @@ void load_file(int argc, char **argv, PAGE *p)
 	int line;//, col;
 	init_page(p, argv[1], size);
 
-	/*for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
-	{
-		for(col = 0; 
-            col < LINE_SIZE - 1 && ((ch = fgetc(fp)) != '\n') && ch != EOF; 
-            col++)
-		{
-			p->text[line].line[col] = ch;
-		}
-		p->text[line].line[col] = '\0';
-		p->numlines++;
-	}*/
-
-    for(line = 0; line < PAGE_SIZE && ch != EOF; line++)
+    for(line = 0; line < size && ch != EOF; line++)
     {
         ch = fgetc(fp);
         while(ch != '\n' && ch != EOF)
         {
             LINE *currline = &(p->text[line]);
-            add_char(currline, ch);
+            if(ch != '\t')
+            {
+                add_char(currline, ch);
+            }
+            else // tab. add 4 spaces instead
+            {
+                int i;
+                for(i = 0; i < TAB_WIDTH; i++)
+                {
+                    add_char(currline, ' ');
+                }
+            }
             ch = fgetc(fp);
         }
         p->numlines++;

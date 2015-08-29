@@ -11,7 +11,6 @@
 typedef struct
 {
 	char *line;
-	int tabs; // keeps track of tabs so we can offset
 	int size; // size of array, not string
 } LINE;
 

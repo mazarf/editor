@@ -5,7 +5,7 @@
 #include <ncurses.h> // might have to move this
 #include "line.h" 
 
-#define PAGE_SIZE 500 /* Max number of lines. Currently not expandable. */
+#define PAGE_SIZE 500 /* Default number of lines */
 #define WIN_SIZE (LINES - 2) /* Size of window, making room for bottom prompt */
 #define NAME_LIMIT 256 /* Max size of a unix filename + 1 */
 
