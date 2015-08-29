@@ -29,12 +29,19 @@ int main(int argc, char *argv[])
 
 	if(argc > 1)
 	{
-		load_file(&page, argv[1]);
+        if(file_exists(argv[1]))
+        {
+		    load_file(&page, argv[1]);
+        }
+        else
+        {
+            init_page(&page, argv[1], PAGE_SIZE);
+            page.numlines = 1;
+        }
 	}
 	else // initialize
 	{
 		init_page(&page, "untitled.txt", PAGE_SIZE);
-		page.text[0].line[0] = '\0';
 		page.numlines = 1;
 	}
 	
@@ -131,9 +138,9 @@ int main(int argc, char *argv[])
 				}
 		}
 	}
-endnc:	endwin();
+endnc:	
 	/* end curses */
-
+    endwin();
 	dest_page(&page);
 	return EXIT_SUCCESS;
 } // main
@@ -229,6 +236,13 @@ void load_file(PAGE *p, char *filename)
 
 	init_page(p, filename, size);
 
+    if(fp == NULL) // file doesn't exist yet. don't bother reading
+    {
+        p->numlines = 1;
+        return;
+    }
+
+
     for(line = 0; line < size && ch != EOF; line++)
     {
         ch = fgetc(fp);
@@ -275,4 +289,13 @@ void save_file(PAGE *p)
 	fclose(fp);
 
 } // save_file
+
+int file_exists(char *filename)
+{
+    FILE *fp = fopen(filename, "r");
+    int result = (fp == NULL);
+    if(result)
+        fclose(fp);
+    return !result;
+}
 /* saving and loading */
