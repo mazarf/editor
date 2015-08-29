@@ -18,11 +18,6 @@ Probably the most well-developed program I made this summer.
 
 ##Current issues:
 
-x-y coordinates in ncurses correspond to rows and columns in
-the text document.  This means tabs are an issue and text
-wrapping is impossible.  Solution: separate screen logic
-from document logic.
-
-Can only save files under the name save.txt.  Solution: create
-a prompt window (from scratch...) that retuns a string to the
-caller. (Done!)
+* Code could be organized better
+* Some arguments/variables don't do anything
+* Need to add copy/paste/undo.

@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
 	if(argc > 1)
 	{
-		load_file(argc, argv, &page);
+		load_file(&page, argv[1]);
 	}
 	else // initialize
 	{
@@ -70,13 +70,13 @@ int main(int argc, char *argv[])
 	            print_page(&page, beg, end);
 				break;
 			case KEY_F(5):
-				save_file(argc, argv, &page);
+				save_file(&page);
                 sprintf(status, "Saved as \'%s\'", page.filename);
 				update_status(status);
 				break;
             case KEY_F(6):
                 prompt_string("Save As:", page.filename, NAME_LIMIT);
-                save_file(argc, argv, &page);
+                save_file(&page);
                 sprintf(status, "Saved as \'%s\'", page.filename);
 				print_page(&page, beg, end);
 				update_status(status);
@@ -204,27 +204,30 @@ void move_down(PAGE *p, int *x, int *y)
 }
 /* movement */
 
-int count_lines(int argc, char **argv)
+int count_lines(FILE *fp)
 {
-	FILE *fp = fopen(argv[1], "r");
 	char ch = '\0';
 	int count = 0;
 	while((ch = fgetc(fp)) != EOF)
 		if( ch == '\n' )
 			count++;
-	
-	fclose(fp);		
+
+    fseek(fp, 0, SEEK_SET); // go to beginning of file
 	return count;
 } // count_lines
 
 /* saving and loading */
-void load_file(int argc, char **argv, PAGE *p)
+void load_file(PAGE *p, char *filename)
 {
-	FILE *fp = fopen(argv[1], "r");
-	int size = count_lines(argc, argv) * 2;
+	FILE *fp = fopen(filename, "r");
+	int size = count_lines(fp) * 2;
 	char ch = '\0';
-	int line;//, col;
-	init_page(p, argv[1], size);
+	int line;
+
+    if(size < PAGE_SIZE)
+        size = PAGE_SIZE;
+
+	init_page(p, filename, size);
 
     for(line = 0; line < size && ch != EOF; line++)
     {
@@ -253,7 +256,7 @@ void load_file(int argc, char **argv, PAGE *p)
 
 } // load_file
 
-void save_file(int argc, char **argv, PAGE *p)
+void save_file(PAGE *p)
 {
 	FILE *fp = fopen(p->filename, "w");
 	int line, col;

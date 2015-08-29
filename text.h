@@ -12,9 +12,9 @@
 
 void update_status(char *info);
 
-int count_lines(int argc, char **argv);
-void load_file(int argc, char **argv, PAGE *p);
-void save_file(int argc, char **argv, PAGE *p);
+int count_lines(FILE *fp);
+void load_file(PAGE *p, char* filename);
+void save_file(PAGE *p);
 
 void move_left(int *x, int *y);
 void move_right(PAGE *p, int *x, int *y);
