@@ -16,6 +16,9 @@ static WINDOW* create_prompt(const char *message, int height, int width)
                            center_y(height), center_x(width));
    werase(prompt);
    mvwprintw(prompt, 1, 1, message);
+   wmove(prompt, 2, 0);
+   waddch(prompt, ACS_LTEE);
+   whline(prompt, ACS_HLINE, 1000);
    box(prompt, 0, 0);
    wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);
    return prompt;
