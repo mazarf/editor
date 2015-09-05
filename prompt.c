@@ -1,5 +1,10 @@
 #include "prompt.h"
 
+static int center_x(int width);
+static int center_y(int height);
+static WINDOW* create_prompt(const char *message, int height, int width);
+static void dest_prompt(WINDOW *prompt);
+
 static int center_x(int width) 
 {
     return (COLS - width) / 2;
@@ -17,7 +22,6 @@ static WINDOW* create_prompt(const char *message, int height, int width)
    werase(prompt);
    mvwprintw(prompt, 1, 1, message);
    wmove(prompt, 2, 0);
-   waddch(prompt, ACS_LTEE);
    whline(prompt, ACS_HLINE, 1000);
    box(prompt, 0, 0);
    wmove(prompt, PROMPT_OFFY, PROMPT_OFFX);

@@ -1,11 +1,9 @@
 Text Editor
 ===========
 
-I learned ncurses and figured why not.
-Posting this now (9/30/15) because school is starting
-so I don't plan on working on it anymore.
+![Image of the program in use.](res/text.bmp)
 
-Probably the most well-developed program I made this summer.
+Functional lightweight text editor written in C using ncurses.
 
 ##How to use:
 
@@ -20,4 +18,5 @@ Probably the most well-developed program I made this summer.
 
 * Code could be organized better
 * Some arguments/variables don't do anything
+* Tabs are always 4 spaces.  This is likely a permanent solution.
 * Need to add copy/paste/undo.
