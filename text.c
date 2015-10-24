@@ -293,9 +293,10 @@ void save_file(PAGE *p)
 int file_exists(char *filename)
 {
     FILE *fp = fopen(filename, "r");
-    int result = (fp == NULL);
-    if(result)
+    if(fp != NULL) {
         fclose(fp);
-    return !result;
+        return 1;
+    }
+    return 0;
 }
 /* saving and loading */
