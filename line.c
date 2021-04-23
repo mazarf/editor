@@ -1,50 +1,36 @@
 #include "line.h"
 
-void init_line(LINE *s)
-{
-	s->size = LINE_SIZE;
-	s->line = (char *)malloc(LINE_SIZE * sizeof(char));
-    s->line[0] = '\0';
+void init_line(LINE *s){
+    s->size = LINE_SIZE;
+    s->line = (char *)malloc(LINE_SIZE * sizeof(char));
+  	s->line[0] = '\0';
 } // init_line
 
+// Insert char into string.
+void insert_char(LINE *s, char c, int index){
+    char temp[2];
+    temp[0] = c;
+    temp[1] = '\0';
+    insert_string(s, temp, index);
+} // insert char using insert_string()
 
-// Insert char into string. 
-void insert_char(LINE *s, char c, int index)
+void insert_string(LINE *s, char *in, int index)
 {
-	int i;
+    int line_ln = strlen(s->line);
+    int in_ln = strlen(in);
+    size_t append_ln = line_ln - index + 1;
+    size_t new_size;
 
-	if(strlen(s->line) >= s->size - 2) expand(s);
+    if(line_ln + in_ln >= s->size){
+        new_size = s->size * 2 + in_ln;
+        s->line = (char *)realloc(s->line, new_size * sizeof(char));
+        s->size = new_size;    
+    }
+    memmove(s->line + index + in_ln, s->line + index, append_ln  * sizeof(char));
+    memcpy(s->line + index, in, (in_ln) * sizeof(char));
+} // insert string
 
-	for(i = strlen(s->line); i >= index; i--)
-		s->line[i + 1] = s->line[i];
-
-	s->line[index] = c;
-} // insert
-
-
-
-void remove_char(LINE *s, int index)
-{
-		int i;
-		int len = strlen(s->line);
-		for(i = index; i < len; i++)
-			s->line[i] = s->line[i + 1];
+void remove_char(LINE *s, int index){
+        size_t append_ln = strlen(s->line) - index;
+        memmove(s->line + index, s->line + index + 1, append_ln * sizeof(char));
 } // remove_char
-
-
-
-// expands size of line
-void expand(LINE *s)
-{
-	int new_size = s->size * 2;
-	char *temp = (char *)malloc(new_size * sizeof(char));
-	strcpy(temp, s->line);
-	free(s->line);
-	s->line = temp;
-	s->size = new_size;	
-} // expand
-
-void add_char(LINE *s, char c)
-{
-    insert_char(s, c, strlen(s->line));
-}
