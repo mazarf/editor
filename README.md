@@ -5,7 +5,7 @@ Text Editor
 
 Functional lightweight text editor written in C using ncurses.
 
-##How to use:
+## How to use:
 
     usage: text [ file ]
 
@@ -14,7 +14,7 @@ Functional lightweight text editor written in C using ncurses.
 * F6 saves the current file and allows you to specify the filename.
 (WARNING: no confirmation screen or error checking yet).
 
-##Current issues:
+## Current issues:
 
 * Code could be organized better
 * Some arguments/variables don't do anything
