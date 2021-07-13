@@ -16,8 +16,6 @@ typedef struct
 
 void init_line(LINE *s);
 void insert_char(LINE *s, char c, int index); // inserts char to string
+void insert_string(LINE *s, char *str, int index);
 void remove_char(LINE *s, int index);
-void expand(LINE *s); // doubles the size of the line
-void add_char(LINE *s, char c); // add to end of line
-
 #endif
