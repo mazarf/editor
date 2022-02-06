@@ -35,13 +35,11 @@ int main(int argc, char *argv[])
         else
         {
             init_page(&page, argv[1], PAGE_SIZE);
-            page.numlines = 1;
         }
     }
     else // initialize
     {
         init_page(&page, "untitled.txt", PAGE_SIZE);
-        page.numlines = 1;
     }
     
     /* curses interface */
@@ -68,15 +66,15 @@ int main(int argc, char *argv[])
     {
 
         
-        y = in_range(y, 0, page.numlines - 1);
-        x = in_range(x, 0, strlen(page.text[y].line));
+        y = clamp(y, 0, page.numlines - 1);
+        x = clamp(x, 0, strlen(page.text[y].line));
 
         if(y > y_offset + WIN_SIZE){
             y_offset = y - WIN_SIZE;
         } else if(y < y_offset){
             y_offset = y;
         }
-        beg = 0 + y_offset;
+        beg = y_offset;
         end = WIN_SIZE + y_offset;
         print_page(&page, beg, end);
         y_draw = y - y_offset;
@@ -92,7 +90,6 @@ int main(int argc, char *argv[])
             case KEY_F(4):
                 if(prompt_yesno("Are you sure you want to quit?"))
                     goto endnc;
-                print_page(&page, beg, end);
                 break;
             case KEY_F(5):
                 save_file(&page);
@@ -103,7 +100,6 @@ int main(int argc, char *argv[])
                 prompt_string("Save As:", page.filename, NAME_LIMIT);
                 save_file(&page);
                 sprintf(status, "Saved: \'%s\'", page.filename);
-                print_page(&page, beg, end);
                 update_status(status);
                 break;
             case KEY_UP:
@@ -156,12 +152,14 @@ int main(int argc, char *argv[])
                 x += TAB_WIDTH;
                 break;
             case '\n': // newline
-                insert_line(&page, y + 1);
-                insert_string(&page.text[y + 1], 
+                if(insert_line(&page, y + 1))
+                {
+                	insert_string(&page.text[y + 1], 
                               page.text[y].line + x, 0);
-                page.text[y].line[x] = '\0';
-                y++;
-                x = 0;
+                	page.text[y].line[x] = '\0';
+                	y++;
+                	x = 0;
+                }
                 break;
             default: // all other chars
                 if( isprint(ch) )
@@ -178,7 +176,7 @@ endnc:
     return EXIT_SUCCESS;
 } // main
 
-int in_range(int integer, int floor, int ceil){
+int clamp(int integer, int floor, int ceil){
     if(integer < floor)
         return floor;
     else if(integer > ceil)
@@ -188,7 +186,7 @@ int in_range(int integer, int floor, int ceil){
 // prints a message at the bottom of the window
 void update_status(char *info)
 {
-    int oldy, oldx; getyx(stdscr, oldy, oldx);
+    //int oldy, oldx; getyx(stdscr, oldy, oldx);
     
     attron(A_REVERSE);
     move(LINES - 1, 0);
@@ -196,13 +194,13 @@ void update_status(char *info)
     printw(info);
     attroff(A_REVERSE);
     
-    move(oldy, oldx);
+    //move(oldy, oldx);
 } // update_status
 
 
 int count_lines(FILE *fp)
 {
-    char ch = '\0';
+    int ch = '\0';
     int count = 0;
     while((ch = fgetc(fp)) != EOF)
         if( ch == '\n' )
@@ -216,18 +214,14 @@ int count_lines(FILE *fp)
 void load_file(PAGE *p, char *filename)
 {
     FILE *fp = fopen(filename, "r");
-    int size = count_lines(fp) * 2;
-    char ch = '\0';
+    int size = count_lines(fp);
+    int ch = '\0';
     int line;
-
-    if(size < PAGE_SIZE)
-        size = PAGE_SIZE;
-
+	if(size == 0) size = 1;
     init_page(p, filename, size);
 
     if(fp == NULL) // file doesn't exist yet. don't bother reading
     {
-        p->numlines = 1;
         return;
     }
 
@@ -240,19 +234,18 @@ void load_file(PAGE *p, char *filename)
             LINE *currline = &(p->text[line]);
             if(ch != '\t')
             {
-                insert_char(currline, ch, strlen(currline->line));
+                add_char(currline, ch);
             }
             else // tab. add 4 spaces instead
             {
                 int i;
                 for(i = 0; i < TAB_WIDTH; i++)
                 {
-                    insert_char(currline, ' ', strlen(currline->line));
+                    add_char(currline, ' ');
                 }
             }
             ch = fgetc(fp);
         }
-        p->numlines++;
     }
 
     fclose(fp);
@@ -289,6 +282,3 @@ int file_exists(char *filename)
     return 0;
 }
 /* saving and loading */
-
-
-

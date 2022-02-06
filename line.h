@@ -10,12 +10,16 @@
 
 typedef struct
 {
-	char *line;
-	int size; // size of array, not string
+    char *line;
+    int size; // size of array, not string
 } LINE;
 
 void init_line(LINE *s);
 void insert_char(LINE *s, char c, int index); // inserts char to string
 void insert_string(LINE *s, char *str, int index);
 void remove_char(LINE *s, int index);
+void add_char(LINE *s, char c); //add to end of line
+void expand(LINE *s, int ln);
 #endif
+
+
