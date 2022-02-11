@@ -3,6 +3,8 @@ Text Editor
 
 ![Image of the program in use.](res/text.bmp)
 
+Almost ready to merge upstream, still need cosmetic style changes, and to write the merge request.
+
 Functional lightweight text editor written in C using ncurses.
 
 ## How to use:
